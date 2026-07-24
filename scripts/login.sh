@@ -27,6 +27,9 @@ if ! sudo -u "$USER" wp package list --fields=name 2>/dev/null | grep -q "wp-cli
     sudo -u "$USER" wp package install aaemnnosttv/wp-cli-login-command --path="$SITE_DIR" >&2
 fi
 
+# Ensure the companion WordPress plugin is installed and activated on this site
+sudo -u "$USER" wp login install --activate --path="$SITE_DIR" >/dev/null 2>&1
+
 # Get the first admin user
 ADMIN_USER=$(sudo -u "$USER" wp user list --role=administrator --field=user_login --path="$SITE_DIR" | head -n 1)
 
