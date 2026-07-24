@@ -92,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
             pageTitle.textContent = item.textContent.trim();
             
             if(item.dataset.target === 'sites') loadSites();
+            if(item.dataset.target === 'activity') {
+                runCommand('activity', [], 'Activity Logs', document.getElementById('terminal-activity'));
+            }
         });
     });
 
@@ -173,6 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-run-security').addEventListener('click', () => {
         runCommand('security', [], 'Security Scan', document.getElementById('terminal-security'));
+    });
+
+    document.getElementById('btn-refresh-activity').addEventListener('click', () => {
+        runCommand('activity', [], 'Activity Logs', document.getElementById('terminal-activity'));
     });
 
     // Load Sites
@@ -283,6 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!currentManageDomain) return;
         runCommand('backup', [currentManageDomain], `Backup: ${currentManageDomain}`);
         setTimeout(() => loadBackups(currentManageDomain), 5000);
+    });
+
+    document.getElementById('btn-site-logs').addEventListener('click', () => {
+        if(!currentManageDomain) return;
+        runCommand('logs', [currentManageDomain], `Error Logs: ${currentManageDomain}`, document.getElementById('term-output'));
+        modalTerminal.classList.remove('hidden');
+        document.getElementById('term-title').textContent = `Error Logs: ${currentManageDomain}`;
     });
 
     document.getElementById('btn-site-delete').addEventListener('click', () => {

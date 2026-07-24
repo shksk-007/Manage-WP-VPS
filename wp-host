@@ -4,6 +4,12 @@ VERSION="2.0"
 
 COMMAND="$1"
 
+# Log the activity
+mkdir -p /opt/wp-host/logs
+if [ -n "$COMMAND" ] && [ "$COMMAND" != "activity" ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Executed: wp-host $COMMAND $2 $3" >> /opt/wp-host/logs/activity.log
+fi
+
 case "$COMMAND" in
 
 scan)
@@ -57,6 +63,10 @@ monitor)
 
 list)
     /opt/wp-host/scripts/list.sh
+    ;;
+
+activity)
+    /opt/wp-host/scripts/activity.sh
     ;;
 
 info)

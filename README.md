@@ -10,7 +10,7 @@ You can manage your server entirely via the **Command Line** or through the stun
 
 ## 🚀 Features
 
-- **Automated LEMP Stack**: One-click installer sets up Nginx, PHP 8.3, MariaDB, Redis, and ClamAV.
+- **Automated LEMP Stack**: One-click installer sets up Nginx, PHP 8.5, MariaDB, Redis, and ClamAV.
 - **Web Dashboard**: A beautiful, dark-mode glassmorphism UI running securely on port `3456`.
 - **1-Click WP Login**: Instantly generate a magic link to log into any WordPress admin area without needing a password.
 - **Security & Scans**: Built-in UFW firewall configuration, Fail2Ban, and on-demand malware scanning (Maldet + ClamAV).
