@@ -31,7 +31,7 @@ fi
 USER=$(echo "$DOMAIN" | cut -d'.' -f1)
 DB="${USER}_db"
 DBUSER="${USER}_user"
-DBPASS=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9!@#$%^&*()_+=' | head -c 24)
+DBPASS=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)
 
 echo ""
 echo "========================================="
@@ -93,12 +93,11 @@ CREATE DATABASE IF NOT EXISTS \`${DB}\`
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
-CREATE USER IF NOT EXISTS '${DBUSER}'@'127.0.0.1'
-IDENTIFIED BY '${DBPASS}';
+CREATE OR REPLACE USER '${DBUSER}'@'localhost' IDENTIFIED BY '${DBPASS}';
+CREATE OR REPLACE USER '${DBUSER}'@'127.0.0.1' IDENTIFIED BY '${DBPASS}';
 
-GRANT ALL PRIVILEGES
-ON \`${DB}\`.*
-TO '${DBUSER}'@'127.0.0.1';
+GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '${DBUSER}'@'localhost';
+GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '${DBUSER}'@'127.0.0.1';
 
 FLUSH PRIVILEGES;
 
