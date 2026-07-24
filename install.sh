@@ -72,7 +72,9 @@ mkdir -p /opt/wp-host/logs
 mkdir -p /opt/wp-host/backups
 
 # Assuming this script is run from the cloned repository:
-cp -r ./* /opt/wp-host/
+if [ "$PWD" != "/opt/wp-host" ]; then
+    cp -r ./* /opt/wp-host/
+fi
 
 # Ensure sites.list exists
 touch /opt/wp-host/sites.list
