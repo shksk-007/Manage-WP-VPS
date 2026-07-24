@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuItems = document.querySelectorAll('.menu-item');
     const views = document.querySelectorAll('.view');
     const pageTitle = document.getElementById('page-title');
+    let perfInterval = null;
 
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
@@ -91,12 +92,50 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update Title
             pageTitle.textContent = item.textContent.trim();
             
+            // Clear previous interval if any
+            if(perfInterval) {
+                clearInterval(perfInterval);
+                perfInterval = null;
+            }
+
             if(item.dataset.target === 'sites') loadSites();
             if(item.dataset.target === 'activity') {
                 runCommand('activity', [], 'Activity Logs', document.getElementById('terminal-activity'));
             }
+            if(item.dataset.target === 'performance') {
+                updatePerformance();
+                perfInterval = setInterval(updatePerformance, 2000);
+            }
         });
     });
+
+    async function updatePerformance() {
+        const fd = new FormData();
+        fd.append('action', 'execute');
+        fd.append('command', 'performance');
+
+        try {
+            const res = await fetch(API_URL, { method: 'POST', body: fd });
+            const data = await res.json();
+            
+            if (data.success && data.output) {
+                const perf = JSON.parse(data.output);
+                
+                const cpuVal = parseFloat(perf.cpu).toFixed(1);
+                document.getElementById('perf-cpu').textContent = `${cpuVal}%`;
+                document.getElementById('bar-cpu').style.width = `${Math.min(cpuVal, 100)}%`;
+
+                const memUsed = parseInt(perf.mem_used);
+                const memTotal = parseInt(perf.mem_total);
+                const memPct = ((memUsed / memTotal) * 100).toFixed(1);
+                
+                document.getElementById('perf-mem').textContent = `${memUsed} / ${memTotal} MB (${memPct}%)`;
+                document.getElementById('bar-mem').style.width = `${Math.min(memPct, 100)}%`;
+            }
+        } catch (e) {
+            console.error("Failed to fetch performance stats.");
+        }
+    }
 
     // Modals
     const btnCreateSite = document.getElementById('btn-create-site');
@@ -276,9 +315,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-site-login').addEventListener('click', async () => {
         if(!currentManageDomain) return;
-        runCommand('login', [currentManageDomain], 'WP-CLI Auto Login', document.getElementById('term-output'));
-        modalTerminal.classList.remove('hidden');
-        document.getElementById('term-title').textContent = 'Magic Login Link';
+        
+        const btn = document.getElementById('btn-site-login');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '<span class="loader-spinner"></span> Generating...';
+        btn.disabled = true;
+
+        const fd = new FormData();
+        fd.append('action', 'execute');
+        fd.append('command', 'login');
+        fd.append('args[]', currentManageDomain);
+
+        try {
+            const res = await fetch(API_URL, { method: 'POST', body: fd });
+            const data = await res.json();
+            
+            if (data.success && data.output) {
+                const lines = data.output.trim().split('\n');
+                let url = '';
+                for (let i = lines.length - 1; i >= 0; i--) {
+                    if (lines[i].trim().startsWith('http')) {
+                        url = lines[i].trim();
+                        break;
+                    }
+                }
+                
+                if (url) {
+                    window.open(url, '_blank');
+                } else {
+                    alert('Failed to extract login link:\n' + data.output);
+                }
+            } else {
+                alert('Login generation failed:\n' + (data.error || 'Unknown error'));
+            }
+        } catch (e) {
+            alert('Request failed.');
+        }
+        
+        btn.innerHTML = oldText;
+        btn.disabled = false;
     });
 
     document.getElementById('btn-site-scan').addEventListener('click', () => {
@@ -302,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-site-delete').addEventListener('click', () => {
         if(!currentManageDomain) return;
         if(confirm(`WARNING! This will permanently delete ${currentManageDomain}. Are you sure?`)) {
-            runCommand('delete', [currentManageDomain], `Delete: ${currentManageDomain}`);
+            runCommand('delete', [currentManageDomain, '--force'], `Delete: ${currentManageDomain}`);
             setTimeout(() => {
                 viewDetail.classList.add('hidden');
                 viewSites.classList.remove('hidden');
@@ -330,20 +405,20 @@ document.addEventListener('DOMContentLoaded', () => {
             loader.classList.add('hidden');
             
             if (data.success && data.output && data.output.trim() !== '') {
-                const backups = data.output.trim().split('\\n');
+                const backups = data.output.trim().split('\n');
                 backups.forEach(bkp => {
                     const li = document.createElement('li');
                     li.className = 'backup-item';
                     li.innerHTML = `
-                        <span><strong>\${bkp}</strong></span>
-                        <button class="btn outline restore-btn" data-backup="\${bkp}">Restore</button>
+                        <span><strong>${bkp}</strong></span>
+                        <button class="btn outline restore-btn" data-backup="${bkp}">Restore</button>
                     `;
                     list.appendChild(li);
 
                     li.querySelector('.restore-btn').addEventListener('click', (e) => {
                         const targetBkp = e.target.dataset.backup;
-                        if(confirm(`Restore backup \${targetBkp} for \${domain}? This overwrites current files and database.`)) {
-                            runCommand('restore', [domain, `--backup=\${targetBkp}`, '--force'], `Restoring \${domain}`);
+                        if(confirm(`Restore backup ${targetBkp} for ${domain}? This overwrites current files and database.`)) {
+                            runCommand('restore', [domain, `--backup=${targetBkp}`, '--force'], `Restoring ${domain}`);
                         }
                     });
                 });

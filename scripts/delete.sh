@@ -1,6 +1,11 @@
 #!/bin/bash
 
 DOMAIN="$1"
+FORCE=0
+
+if [ "$2" == "--force" ]; then
+    FORCE=1
+fi
 
 SITE_LIST="/opt/wp-host/sites.list"
 BACKUP_SCRIPT="/opt/wp-host/scripts/backup.sh"
@@ -8,21 +13,24 @@ BACKUP_SCRIPT="/opt/wp-host/scripts/backup.sh"
 if [ -z "$DOMAIN" ]; then
     echo ""
     echo "Usage:"
-    echo "  wp-host delete domain.com"
+    echo "  wp-host delete domain.com [--force]"
     echo ""
     exit 1
 fi
 
-if [ ! -f "$SITE_LIST" ]; then
-    echo "ERROR: Site registry not found."
-    exit 1
-fi
+if [ "$FORCE" -eq 0 ]; then
+    if [ ! -f "$SITE_LIST" ]; then
+        echo "ERROR: Site registry not found."
+        exit 1
+    fi
 
-if ! grep -qxF "$DOMAIN" "$SITE_LIST"; then
-    echo ""
-    echo "ERROR: '$DOMAIN' is not managed by WP Host."
-    echo ""
-    exit 1
+    if ! grep -qxF "$DOMAIN" "$SITE_LIST"; then
+        echo ""
+        echo "ERROR: '$DOMAIN' is not managed by WP Host."
+        echo "Use 'wp-host delete $DOMAIN --force' to force deletion anyway."
+        echo ""
+        exit 1
+    fi
 fi
 
 USER=$(echo "$DOMAIN" | cut -d'.' -f1)

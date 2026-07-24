@@ -60,6 +60,9 @@ migrate)
 monitor)
     /opt/wp-host/scripts/monitor.sh
     ;;
+performance)
+    /opt/wp-host/scripts/performance.sh
+    ;;
 
 list)
     /opt/wp-host/scripts/list.sh

@@ -47,6 +47,10 @@
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
                     Server Status
                 </a>
+                <a href="#" class="menu-item" data-target="performance">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Performance
+                </a>
                 <a href="#" class="menu-item" data-target="security">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                     Security
@@ -140,6 +144,36 @@
                     </div>
                     <div class="panel-body">
                         <pre id="terminal-server" class="terminal-output">Click "Run Doctor" to check system health.</pre>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Performance View -->
+            <section id="view-performance" class="view hidden">
+                <div class="glass-panel main-panel">
+                    <div class="panel-header">
+                        <h3>Live Server Performance</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h4>CPU Usage</h4>
+                                <div class="stat-value" id="perf-cpu">--%</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="bar-cpu" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Memory Usage</h4>
+                                <div class="stat-value" id="perf-mem">-- / -- MB</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="bar-mem" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; font-size: 0.9rem; color: #a1a1aa;">
+                            Updating in real-time...
+                        </div>
                     </div>
                 </div>
             </section>

@@ -123,6 +123,8 @@ if [ -f /opt/wp-host/ui/sudoers-wp-host ]; then
     chmod 440 /etc/sudoers.d/wp-host-ui
 fi
 
+# Ensure Nginx user can read PHP-FPM default socket
+usermod -aG www-data nginx || true
 systemctl restart nginx || echo "Nginx not started in testing environment"
 
 echo "[7/7] Configuring Firewall..."
