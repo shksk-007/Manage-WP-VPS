@@ -141,7 +141,8 @@ echo ""
 echo "Downloading WordPress..."
 
 sudo -u "$USER" wp core download \
---path=/home/$USER/public_html
+--path=/home/$USER/public_html \
+--force
 
 echo "WordPress downloaded."
 
@@ -155,7 +156,8 @@ sudo -u "$USER" wp config create \
 --dbhost="127.0.0.1" \
 --dbcharset="utf8mb4" \
 --path=/home/$USER/public_html \
---skip-check
+--skip-check \
+--force
 
 echo "wp-config.php created."
 
