@@ -1,0 +1,122 @@
+#!/bin/bash
+
+VERSION="2.0"
+
+COMMAND="$1"
+
+case "$COMMAND" in
+
+scan)
+    /opt/wp-host/scripts/scan.sh "$2"
+    ;;
+
+cron)
+    /opt/wp-host/scripts/cron.sh "$2" "$3"
+    ;;
+rollback)
+    /opt/wp-host/scripts/rollback.sh "$2"
+    ;;
+create)
+    /opt/wp-host/scripts/create.sh "$2"
+    ;;
+security)
+    /opt/wp-host/scripts/security.sh
+    ;;
+delete)
+    /opt/wp-host/scripts/delete.sh "$2"
+    ;;
+
+backup)
+    /opt/wp-host/scripts/backup.sh "$2"
+    ;;
+
+restore)
+    /opt/wp-host/scripts/restore.sh "$2"
+    ;;
+
+recover)
+    /opt/wp-host/scripts/recover.sh "$2"
+    ;;
+
+update)
+    /opt/wp-host/scripts/update.sh "$2"
+    ;;
+firewall)
+    /opt/wp-host/scripts/firewall.sh
+    ;;
+health)
+    /opt/wp-host/scripts/health.sh
+    ;;
+migrate)
+    /opt/wp-host/scripts/migrate.sh "$2"
+    ;;
+
+monitor)
+    /opt/wp-host/scripts/monitor.sh
+    ;;
+
+list)
+    /opt/wp-host/scripts/list.sh
+    ;;
+
+info)
+    /opt/wp-host/scripts/info.sh "$2"
+    ;;
+
+status)
+    /opt/wp-host/scripts/status.sh
+    ;;
+
+doctor)
+    /opt/wp-host/scripts/doctor.sh
+    ;;
+
+logs)
+    /opt/wp-host/scripts/logs.sh "$2"
+    ;;
+login)
+    /opt/wp-host/scripts/login.sh "$2"
+    ;;
+backups-list)
+    /opt/wp-host/scripts/backups-list.sh "$2"
+    ;;
+version)
+    echo "WP Host Manager v$VERSION"
+    ;;
+
+shell)
+    /opt/wp-host/scripts/shell.sh "$2"
+    ;;
+
+help|"")
+    echo ""
+    echo "========================================="
+    echo " WP Host Manager v$VERSION"
+    echo "========================================="
+    echo ""
+    echo "Commands:"
+    echo ""
+    echo "  wp-host create domain.com"
+    echo "  wp-host delete domain.com"
+    echo "  wp-host backup domain.com"
+    echo "  wp-host restore domain.com"
+    echo "  wp-host recover domain.com"
+    echo "  wp-host recover --all"
+    echo "  wp-host update domain.com"
+    echo "  wp-host update --all"
+    echo "  wp-host monitor"
+    echo "  wp-host list"
+echo "  wp-host migrate domain.com"
+    echo "  wp-host info domain.com"
+    echo "  wp-host status"
+    echo "  wp-host doctor"
+    echo "  wp-host version"
+    ;;
+
+*)
+    echo "Unknown command: $COMMAND"
+    echo "Run: wp-host help"
+    exit 1
+    ;;
+
+esac

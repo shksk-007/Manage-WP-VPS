@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WP Host Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Authentication Overlay -->
+    <div id="auth-overlay" class="overlay active">
+        <div class="auth-box glass-panel">
+            <h2>WP Host Manager</h2>
+            <p>Please login to continue</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn primary">Login</button>
+                <div id="login-error" class="error-text"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-container" class="hidden">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="brand">
+                <h2>WP Host</h2>
+                <span class="badge">v2.0</span>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active" data-target="sites">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Manage Sites
+                </a>
+                <a href="#" class="menu-item" data-target="server">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                    Server Status
+                </a>
+                <a href="#" class="menu-item" data-target="security">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Security
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn outline full-width">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Header -->
+            <header class="topbar">
+                <h1 id="page-title">Manage Sites</h1>
+                <button class="btn primary" id="btn-create-site">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    New Site
+                </button>
+            </header>
+
+            <!-- Sites View -->
+            <section id="view-sites" class="view active">
+                <div class="glass-panel main-panel">
+                    <div class="panel-header">
+                        <h3>Installed Domains</h3>
+                        <button class="btn icon" id="btn-refresh-sites" title="Refresh">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <div id="sites-loading" class="loader hidden"></div>
+                        <ul id="sites-list" class="site-list">
+                            <!-- Sites injected here -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Site View -->
+            <section id="view-site-detail" class="view hidden">
+                <div class="glass-panel main-panel">
+                    <div class="panel-header">
+                        <h3 id="detail-domain-title">site.com</h3>
+                        <button class="btn outline" id="btn-back-sites">&larr; Back to Sites</button>
+                    </div>
+                    <div class="panel-body">
+                        <div class="site-actions-grid">
+                            <button class="btn primary" id="btn-site-login">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                                1-Click WP Login
+                            </button>
+                            <button class="btn outline" id="btn-site-scan">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                Scan for Malware
+                            </button>
+                            <button class="btn outline" id="btn-site-backup">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                Create Backup
+                            </button>
+                            <button class="btn outline danger" id="btn-site-delete">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Delete Site
+                            </button>
+                        </div>
+                        
+                        <h4 style="margin-top: 30px; margin-bottom: 15px;">Available Backups</h4>
+                        <div id="site-backups-loading" class="loader hidden"></div>
+                        <ul id="site-backups-list" class="site-list">
+                            <!-- Backups injected here -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Server View -->
+            <section id="view-server" class="view hidden">
+                <div class="glass-panel main-panel">
+                    <div class="panel-header">
+                        <h3>System Health</h3>
+                        <button class="btn primary outline" id="btn-run-doctor">Run Doctor</button>
+                    </div>
+                    <div class="panel-body">
+                        <pre id="terminal-server" class="terminal-output">Click "Run Doctor" to check system health.</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security View -->
+            <section id="view-security" class="view hidden">
+                <div class="glass-panel main-panel">
+                    <div class="panel-header">
+                        <h3>Security Check</h3>
+                        <button class="btn primary outline" id="btn-run-security">Check Security</button>
+                    </div>
+                    <div class="panel-body">
+                        <pre id="terminal-security" class="terminal-output">Click "Check Security" to scan firewall and ports.</pre>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal for Create Site -->
+    <div id="modal-create" class="overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h3>Create New Site</h3>
+                <button class="btn icon close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-create-site">
+                    <div class="input-group">
+                        <label>Domain Name</label>
+                        <input type="text" id="new-domain" placeholder="example.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Admin Username</label>
+                        <input type="text" id="new-admin" placeholder="admin" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Admin Email</label>
+                        <input type="email" id="new-email" placeholder="admin@example.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Admin Password</label>
+                        <input type="password" id="new-pass" required>
+                    </div>
+                    <div class="input-group">
+                        <button type="submit" class="btn primary full-width">Create WordPress Site</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn outline close-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Terminal Output -->
+    <div id="modal-terminal" class="overlay hidden">
+        <div class="modal glass-panel large">
+            <div class="modal-header">
+                <h3 id="term-title">Command Output</h3>
+                <button class="btn icon close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="term-output" class="terminal-output loader-bg"></pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn primary close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
