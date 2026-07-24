@@ -74,6 +74,12 @@ if [ -f "$PHP_INI" ]; then
     sed -i "s/^max_execution_time = .*/max_execution_time = $DEFAULT_TIME/" "$PHP_INI"
     sed -i "s/^max_input_vars = .*/max_input_vars = $DEFAULT_VARS/" "$PHP_INI"
     
+    # Tune OPcache
+    sed -i 's/^;opcache.interned_strings_buffer=.*/opcache.interned_strings_buffer=32/' "$PHP_INI"
+    sed -i 's/^opcache.interned_strings_buffer=.*/opcache.interned_strings_buffer=32/' "$PHP_INI"
+    sed -i 's/^;opcache.memory_consumption=.*/opcache.memory_consumption=256/' "$PHP_INI"
+    sed -i 's/^opcache.memory_consumption=.*/opcache.memory_consumption=256/' "$PHP_INI"
+    
     echo "Restarting PHP 8.5 FPM service..."
     systemctl restart php8.5-fpm
     echo "✅ Optimization complete! Your WordPress site is now configured for maximum performance."
