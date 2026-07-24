@@ -15,6 +15,8 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+if [ ! -f /opt/wp-host/.installed ]; then
+
 echo "[1/7] Updating system and installing prerequisites..."
 apt update
 apt install -y software-properties-common curl git wget unzip fail2ban ufw
@@ -64,6 +66,11 @@ if [ ! -f /usr/local/bin/wp ]; then
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
     chmod +x wp-cli.phar
     mv wp-cli.phar /usr/local/bin/wp
+fi
+
+touch /opt/wp-host/.installed
+else
+    echo "Dependencies already installed. Skipping to core setup..."
 fi
 
 echo "[5/7] Setting up WP Host Manager core..."
