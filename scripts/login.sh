@@ -19,17 +19,6 @@ if [ ! -d "$SITE_DIR" ]; then
     exit 1
 fi
 
-# Ensure wp-cli login command is installed for this user
-# It needs to be installed via WP-CLI package manager
-# We run it as the site user
-if ! sudo -u "$USER" wp package list --fields=name 2>/dev/null | grep -q "wp-cli-login-command"; then
-    echo "Installing wp-cli login command for user $USER..." >&2
-    sudo -u "$USER" wp package install aaemnnosttv/wp-cli-login-command --path="$SITE_DIR" >&2
-fi
-
-# Ensure the companion WordPress plugin is installed and activated on this site
-sudo -u "$USER" wp login install --activate --path="$SITE_DIR" >/dev/null 2>&1
-
 # Get the first admin user
 ADMIN_USER=$(sudo -u "$USER" wp user list --role=administrator --field=user_login --path="$SITE_DIR" | head -n 1)
 
@@ -38,7 +27,33 @@ if [ -z "$ADMIN_USER" ]; then
     exit 1
 fi
 
-# Generate magic login link
-LOGIN_URL=$(sudo -u "$USER" wp login create "$ADMIN_USER" --url-only --path="$SITE_DIR")
+# Generate a secure random token for the filename
+TOKEN=$(head -c 32 /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 24)
+TEMP_FILE="$SITE_DIR/login_${TOKEN}.php"
 
-echo "$LOGIN_URL"
+# Create a self-destructing PHP login script
+cat << 'EOF' | sudo -u "$USER" tee "$TEMP_FILE" >/dev/null
+<?php
+require 'wp-load.php';
+$admin_username = 'YOUR_ADMIN_USER';
+$user = get_user_by('login', $admin_username);
+
+if ($user) {
+    wp_set_current_user($user->ID, $user->user_login);
+    wp_set_auth_cookie($user->ID);
+    do_action('wp_login', $user->user_login, $user);
+}
+
+// Self-destruct for security
+unlink(__FILE__);
+
+// Redirect to dashboard
+wp_redirect(admin_url());
+exit;
+EOF
+
+# Inject the actual username into the script
+sudo -u "$USER" sed -i "s/YOUR_ADMIN_USER/$ADMIN_USER/" "$TEMP_FILE"
+
+# Output the magic link
+echo "https://$DOMAIN/login_${TOKEN}.php"
