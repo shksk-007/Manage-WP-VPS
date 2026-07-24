@@ -124,7 +124,8 @@ fi
 systemctl restart nginx || echo "Nginx not started in testing environment"
 
 echo "[7/7] Configuring Firewall..."
-ufw allow 'Nginx Full' || true
+ufw allow 80/tcp || true
+ufw allow 443/tcp || true
 ufw allow 'OpenSSH' || true
 ufw allow 3456/tcp || true # Web UI Port
 
