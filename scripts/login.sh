@@ -22,9 +22,9 @@ fi
 # Ensure wp-cli login command is installed for this user
 # It needs to be installed via WP-CLI package manager
 # We run it as the site user
-if ! sudo -u "$USER" wp package list --fields=name 2>/dev/null | grep -q "wp-cli/login-command"; then
-    echo "Installing wp-cli/login-command for user $USER..." >&2
-    sudo -u "$USER" wp package install wp-cli/login-command --path="$SITE_DIR" >&2
+if ! sudo -u "$USER" wp package list --fields=name 2>/dev/null | grep -q "wp-cli-login-command"; then
+    echo "Installing wp-cli login command for user $USER..." >&2
+    sudo -u "$USER" wp package install aaemnnosttv/wp-cli-login-command --path="$SITE_DIR" >&2
 fi
 
 # Get the first admin user
