@@ -94,6 +94,13 @@ chmod +x /opt/wp-host/scripts/*.sh
 ln -sf /opt/wp-host/wp-host /usr/local/bin/wp-host
 
 echo "[6/7] Setting up Web UI..."
+mkdir -p /etc/nginx/sites-available
+mkdir -p /etc/nginx/sites-enabled
+
+if ! grep -q "sites-enabled" /etc/nginx/nginx.conf 2>/dev/null; then
+    sed -i '/http {/a \    include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf || true
+fi
+
 # Symlink Nginx UI config
 if [ -f /opt/wp-host/ui/nginx-ui.conf ]; then
     ln -sf /opt/wp-host/ui/nginx-ui.conf /etc/nginx/sites-available/wp-host-ui.conf

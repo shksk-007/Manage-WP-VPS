@@ -119,6 +119,9 @@ echo "PHP-FPM pool created."
 echo ""
 echo "Creating Nginx configuration..."
 
+mkdir -p /etc/nginx/sites-available
+mkdir -p /etc/nginx/sites-enabled
+
 sed \
 -e "s/{{DOMAIN}}/$DOMAIN/g" \
 -e "s/{{USER}}/$USER/g" \
