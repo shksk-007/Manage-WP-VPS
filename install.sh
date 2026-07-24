@@ -15,7 +15,16 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [ ! -f /opt/wp-host/.installed ]; then
+REQUIRED_PKGS="nginx php8.5-fpm ufw fail2ban redis-server mariadb-server clamav certbot"
+NEEDS_INSTALL=0
+for pkg in $REQUIRED_PKGS; do
+    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+        NEEDS_INSTALL=1
+        break
+    fi
+done
+
+if [ "$NEEDS_INSTALL" -eq 1 ]; then
 
 echo "[1/7] Updating system and installing prerequisites..."
 apt update
@@ -68,7 +77,6 @@ if [ ! -f /usr/local/bin/wp ]; then
     mv wp-cli.phar /usr/local/bin/wp
 fi
 
-touch /opt/wp-host/.installed
 else
     echo "Dependencies already installed. Skipping to core setup..."
 fi
