@@ -152,7 +152,7 @@ sudo -u "$USER" wp config create \
 --dbname="$DB" \
 --dbuser="$DBUSER" \
 --dbpass="$DBPASS" \
---dbhost="localhost" \
+--dbhost="127.0.0.1" \
 --dbcharset="utf8mb4" \
 --path=/home/$USER/public_html \
 --skip-check

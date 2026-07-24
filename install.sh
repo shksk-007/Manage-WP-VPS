@@ -61,7 +61,9 @@ apt install -y php8.5-fpm php8.5-cli php8.5-mysql php8.5-xml php8.5-curl php8.5-
 systemctl stop clamav-freshclam || true
 freshclam
 systemctl start clamav-freshclam || true
-
+# Ensure MariaDB is enabled and running
+systemctl enable mariadb || true
+systemctl start mariadb || true
 echo "[3.5/7] Configuring Automated Backups Cron Job..."
 echo "0 2 * * * root /usr/local/bin/wp-host backup --all" > /etc/cron.d/wp-host-backups
 chmod 644 /etc/cron.d/wp-host-backups
