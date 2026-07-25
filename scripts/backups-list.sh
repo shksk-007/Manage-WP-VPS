@@ -15,5 +15,5 @@ if [ ! -d "$BACKUP_DIR" ]; then
     exit 0
 fi
 
-# List directories sorted by name (date)
-ls -1 "$BACKUP_DIR" | sort -r
+# List directories sorted by modification time (newest first)
+ls -1t "$BACKUP_DIR"

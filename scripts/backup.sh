@@ -16,9 +16,14 @@ log() {
 backup_site() {
 
     DOMAIN="$1"
+    MODE="${2:-manual}"
     USER=$(echo "$DOMAIN" | cut -d'.' -f1)
 
-    DATE=$(date +%F_%H-%M-%S)
+    if [ "$MODE" = "cron" ]; then
+        DATE=$(date +%d_%m_%Y)
+    else
+        DATE=$(date +%d_%m_%Y_Manual)
+    fi
 
     SITE_DIR="$BACKUP_DIR/$DOMAIN/$DATE"
 
@@ -63,7 +68,9 @@ tar -czf "$SITE_DIR/files.tar.gz" \
             -mindepth 1 \
             -maxdepth 1 \
             -type d \
-            | sort \
+            -printf "%T@ %p\n" \
+            | sort -n \
+            | cut -d' ' -f2- \
             | head -n "$REMOVE" \
             | xargs -r rm -rf
 
@@ -81,7 +88,7 @@ if [ "$1" = "--all" ]; then
     while IFS= read -r DOMAIN
     do
         [ -z "$DOMAIN" ] && continue
-        backup_site "$DOMAIN"
+        backup_site "$DOMAIN" "cron"
     done < /opt/wp-host/sites.list
 
     exit 0
@@ -89,7 +96,7 @@ if [ "$1" = "--all" ]; then
 fi
 if [ -n "$1" ]; then
 
-    backup_site "$1"
+    backup_site "$1" "manual"
 
     exit 0
 

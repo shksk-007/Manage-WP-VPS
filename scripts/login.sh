@@ -27,6 +27,9 @@ if [ -z "$ADMIN_USER" ]; then
     exit 1
 fi
 
+# Clean up any orphaned login scripts from previous unused attempts
+sudo -u "$USER" rm -f "$SITE_DIR"/login_*.php
+
 # Generate a secure random token for the filename
 TOKEN=$(head -c 32 /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 24)
 TEMP_FILE="$SITE_DIR/login_${TOKEN}.php"

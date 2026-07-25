@@ -66,7 +66,7 @@ else
     BACKUPS=()
     i=1
 
-    for DIR in $(ls -1 "$BACKUP_ROOT" | sort)
+    for DIR in $(ls -1tr "$BACKUP_ROOT")
     do
         BACKUPS+=("$DIR")
         echo "$i) $DIR"
@@ -138,7 +138,7 @@ echo "Extracting files..."
 
 tar -xzf \
 "$BACKUP_PATH/files.tar.gz" \
--C /
+-C /home/$USER
 
 echo ""
 
