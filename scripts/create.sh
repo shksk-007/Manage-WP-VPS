@@ -194,7 +194,7 @@ if ! command -v dig >/dev/null 2>&1; then
     apt-get update -y >/dev/null 2>&1
     apt-get install -y dnsutils >/dev/null 2>&1 || apt-get install -y bind9-dnsutils >/dev/null 2>&1
 fi
-DOMAIN_IP=$(dig +short "$DOMAIN" | tail -n1)
+DOMAIN_IP=$(dig +short @8.8.8.8 "$DOMAIN" | tail -n1)
 SERVER_IP=$(curl -4 -s https://ifconfig.me)
 
 if [ "$DOMAIN_IP" != "$SERVER_IP" ]; then
