@@ -139,6 +139,11 @@ echo "Nginx configured."
 echo ""
 echo "Downloading WordPress..."
 
+# Ensure loopback requests (wp-cron, rest-api) do not timeout due to lack of hairpin NAT
+if ! grep -q "$DOMAIN" /etc/hosts; then
+    echo "127.0.0.1 $DOMAIN" >> /etc/hosts
+fi
+
 sudo -u "$USER" wp core download \
 --path=/home/$USER/public_html \
 --force

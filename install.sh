@@ -59,8 +59,13 @@ apt install -y php8.5-fpm php8.5-cli php8.5-mysql php8.5-xml php8.5-curl php8.5-
 
 # Ensure ClamAV databases are up to date
 systemctl stop clamav-freshclam || true
-freshclam
+freshclam || true
 systemctl start clamav-freshclam || true
+
+# Optimize MariaDB to prevent connection timeouts caused by reverse DNS lookups
+mkdir -p /etc/mysql/mariadb.conf.d/
+echo -e "[mysqld]\nskip-name-resolve" > /etc/mysql/mariadb.conf.d/99-skip-name-resolve.cnf
+systemctl restart mariadb || true
 # Ensure MariaDB is enabled and running
 systemctl enable mariadb || true
 systemctl start mariadb || true
