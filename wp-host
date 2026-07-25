@@ -33,7 +33,7 @@ delete)
     ;;
 
 backup)
-    /opt/wp-host/scripts/backup.sh "$2"
+    /opt/wp-host/scripts/backup.sh "$2" "$3"
     ;;
 
 restore)

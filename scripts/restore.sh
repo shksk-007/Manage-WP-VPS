@@ -181,8 +181,10 @@ echo "Resetting database and admin credentials..."
 DBUSER="${USER}_usr"
 NEW_DBPASS=$(openssl rand -hex 12)
 
-# Update database user password
-mariadb -e "ALTER USER '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$NEW_DBPASS'; FLUSH PRIVILEGES;"
+# Update database user password robustly for both localhost and 127.0.0.1
+mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$NEW_DBPASS';"
+mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'localhost' IDENTIFIED BY '$NEW_DBPASS';"
+mariadb -e "FLUSH PRIVILEGES;"
 
 if [ -f "$SITE/wp-config.php" ]; then
     sudo -u "$USER" wp config set DB_PASSWORD "$NEW_DBPASS" --path="$SITE"

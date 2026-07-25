@@ -97,8 +97,20 @@ if [ "$1" = "--all" ]; then
 
 fi
 if [ -n "$1" ]; then
+    MODE="$2"
 
-    backup_site "$1" "manual"
+    # If run interactively from CLI without a mode, ask for a name
+    if [ -z "$MODE" ] && [ -t 0 ]; then
+        read -p "Enter a custom name for this backup (or leave blank for default): " CUSTOM_NAME
+        CUSTOM_NAME=$(echo "$CUSTOM_NAME" | tr -cd 'a-zA-Z0-9_-')
+        if [ -n "$CUSTOM_NAME" ]; then
+            MODE="$CUSTOM_NAME"
+        fi
+    fi
+
+    [ -z "$MODE" ] && MODE="manual"
+
+    backup_site "$1" "$MODE"
 
     exit 0
 
