@@ -96,9 +96,13 @@ fi
 
 systemctl restart php8.5-fpm
 echo "Removing Nginx..."
-rm -f /etc/nginx/sites-enabled/$DOMAIN.conf
 rm -f /etc/nginx/sites-available/$DOMAIN.conf
+rm -f /etc/nginx/sites-enabled/$DOMAIN.conf
 
+# Remove loopback entry from /etc/hosts
+sed -i "/127.0.0.1 $DOMAIN/d" /etc/hosts
+
+echo "Reloading Nginx..."
 nginx -t >/dev/null 2>&1
 
 if [ $? -eq 0 ]; then

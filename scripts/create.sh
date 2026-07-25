@@ -189,7 +189,12 @@ echo "Redis Object Cache enabled."
 echo ""
 echo "Checking DNS..."
 
-DOMAIN_IP=$(getent hosts "$DOMAIN" | awk '{ print $1 }' | head -n1)
+if ! command -v dig >/dev/null 2>&1; then
+    echo "Installing dnsutils for DNS verification..."
+    apt-get update -y >/dev/null 2>&1
+    apt-get install -y dnsutils >/dev/null 2>&1 || apt-get install -y bind9-dnsutils >/dev/null 2>&1
+fi
+DOMAIN_IP=$(dig +short "$DOMAIN" | tail -n1)
 SERVER_IP=$(curl -4 -s https://ifconfig.me)
 
 if [ "$DOMAIN_IP" != "$SERVER_IP" ]; then
