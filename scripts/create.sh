@@ -64,6 +64,17 @@ else
     echo "Running in non-interactive mode."
 fi
 
+# Define rollback function
+rollback() {
+    echo ""
+    echo "========================================="
+    echo " ERROR DETECTED: Rolling back changes..."
+    echo "========================================="
+    /opt/wp-host/scripts/delete.sh "$DOMAIN" --force
+    echo "Rollback complete. The broken site has been removed."
+    exit 1
+}
+
 echo ""
 echo "Creating Linux user..."
 
@@ -89,7 +100,7 @@ chmod 755 /home/$USER/public_html
 echo ""
 echo "Creating MariaDB database..."
 
-mariadb <<EOF
+mariadb <<EOF || { echo "Database creation failed!"; rollback; }
 
 CREATE DATABASE IF NOT EXISTS \`${DB}\`
 CHARACTER SET utf8mb4
@@ -148,7 +159,7 @@ fi
 
 sudo -u "$USER" wp core download \
 --path=/home/$USER/public_html \
---force
+--force || { echo "WordPress download failed!"; rollback; }
 
 echo "WordPress downloaded."
 
@@ -163,7 +174,7 @@ sudo -u "$USER" wp config create \
 --dbcharset="utf8mb4" \
 --path=/home/$USER/public_html \
 --skip-check \
---force
+--force || { echo "wp-config.php creation failed!"; rollback; }
 
 echo "wp-config.php created."
 
@@ -176,7 +187,7 @@ sudo -u "$USER" wp core install \
 --admin_user="$ADMIN_USER" \
 --admin_password="$ADMIN_PASSWORD" \
 --admin_email="$ADMIN_EMAIL" \
---path=/home/$USER/public_html
+--path=/home/$USER/public_html || { echo "WordPress installation failed!"; rollback; }
 
 echo "WordPress installed."
 
@@ -214,7 +225,7 @@ certbot --nginx \
 --agree-tos \
 -m "$LETSENCRYPT_EMAIL" \
 -d "$DOMAIN" \
--d "www.$DOMAIN"
+-d "www.$DOMAIN" || { echo "SSL Installation failed!"; rollback; }
 
 # Enable HTTP/2 for the domain
 # Certbot usually adds 'listen 443 ssl;' which we can append to.
