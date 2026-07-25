@@ -138,6 +138,9 @@ echo ""
 
 echo "Restoring database..."
 
+# Ensure database exists (in case the site was completely deleted before restore)
+mariadb -e "CREATE DATABASE IF NOT EXISTS \`${DB}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
 gunzip -c \
 "$BACKUP_PATH/database.sql.gz" \
 | mariadb "$DB"
