@@ -211,7 +211,8 @@ certbot --nginx \
 
 # Enable HTTP/2 for the domain
 # Certbot usually adds 'listen 443 ssl;' which we can append to.
-if nginx -V 2>&1 | grep -q "nginx/1.25\|nginx/1.26\|nginx/1.27"; then
+NGINX_VERSION=$(nginx -v 2>&1 | grep -o '[0-9\.]*' | head -1)
+if dpkg --compare-versions "$NGINX_VERSION" "ge" "1.25.0" 2>/dev/null; then
     sed -i '/listen 443 ssl;/a \    http2 on;' /etc/nginx/sites-available/$DOMAIN.conf
 else
     sed -i 's/listen 443 ssl;/listen 443 ssl http2;/g' /etc/nginx/sites-available/$DOMAIN.conf
