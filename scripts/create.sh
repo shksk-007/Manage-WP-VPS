@@ -209,7 +209,16 @@ certbot --nginx \
 -d "$DOMAIN" \
 -d "www.$DOMAIN"
 
-echo "SSL installed."
+# Enable HTTP/2 for the domain
+# Certbot usually adds 'listen 443 ssl;' which we can append to.
+if nginx -V 2>&1 | grep -q "nginx/1.25\|nginx/1.26\|nginx/1.27"; then
+    sed -i '/listen 443 ssl;/a \    http2 on;' /etc/nginx/sites-available/$DOMAIN.conf
+else
+    sed -i 's/listen 443 ssl;/listen 443 ssl http2;/g' /etc/nginx/sites-available/$DOMAIN.conf
+fi
+systemctl reload nginx
+
+echo "SSL and HTTP/2 installed."
 
 echo ""
 echo "Updating WordPress URLs..."

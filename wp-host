@@ -19,6 +19,9 @@ scan)
 cron)
     /opt/wp-host/scripts/cron.sh "$2" "$3"
     ;;
+upgrade)
+    bash /opt/wp-host/scripts/upgrade.sh
+    ;;
 rollback)
     /opt/wp-host/scripts/rollback.sh "$2"
     ;;

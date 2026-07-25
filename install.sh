@@ -121,6 +121,16 @@ if ! grep -q "sites-enabled" /etc/nginx/nginx.conf 2>/dev/null; then
     sed -i '/http {/a \    include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf || true
 fi
 
+# Set up FastCGI Cache zone
+mkdir -p /var/run/nginx-cache
+chown -R www-data:www-data /var/run/nginx-cache
+cat > /etc/nginx/conf.d/fastcgi_cache.conf <<'EOF'
+fastcgi_cache_path /var/run/nginx-cache levels=1:2 keys_zone=WORDPRESS:100m inactive=60m;
+fastcgi_cache_key "$scheme$request_method$host$request_uri";
+fastcgi_cache_use_stale error timeout invalid_header http_500;
+fastcgi_ignore_headers Cache-Control Expires Set-Cookie;
+EOF
+
 # Symlink Nginx UI config
 if [ -f /opt/wp-host/ui/nginx-ui.conf ]; then
     ln -sf /opt/wp-host/ui/nginx-ui.conf /etc/nginx/sites-available/wp-host-ui.conf
