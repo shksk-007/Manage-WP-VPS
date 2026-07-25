@@ -24,7 +24,7 @@ if [ -z "$DOMAIN" ]; then
     echo "Usage:"
     echo "wp-host create domain.com"
     echo "or"
-    echo "wp-host create --domain=x --admin=x --email=x --pass=x --force"
+    echo "wp-host create --domain=x --admin=x --email=x --pass=x --force [--skip-ssl]"
     exit 1
 fi
 
@@ -53,8 +53,10 @@ if [ $FORCE -eq 0 ]; then
     read -p "Admin Email: " ADMIN_EMAIL
     read -s -p "Admin Password: " ADMIN_PASSWORD
     echo ""
-    read -p "Let's Encrypt Email (for SSL warnings): " LETSENCRYPT_EMAIL
-    echo ""
+    if [ "$SKIP_SSL" -eq 0 ]; then
+        read -p "Let's Encrypt Email (for SSL warnings): " LETSENCRYPT_EMAIL
+        echo ""
+    fi
 
     if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
         echo "Cancelled."
@@ -199,58 +201,62 @@ sudo -u "$USER" wp redis enable --path=/home/$USER/public_html
 
 echo "Redis Object Cache enabled."
 
-echo ""
-echo "Checking DNS..."
-
-if ! command -v dig >/dev/null 2>&1; then
-    echo "Installing dnsutils for DNS verification..."
-    apt-get update -y >/dev/null 2>&1
-    apt-get install -y dnsutils >/dev/null 2>&1 || apt-get install -y bind9-dnsutils >/dev/null 2>&1
-fi
-DOMAIN_IP=$(dig +short @8.8.8.8 "$DOMAIN" | tail -n1)
-SERVER_IP=$(curl -4 -s https://ifconfig.me)
-
-if [ "$DOMAIN_IP" != "$SERVER_IP" ]; then
+if [ "$SKIP_SSL" -eq 1 ]; then
     echo ""
-    echo "Domain DNS does not point to this server."
-    echo "Skipping SSL."
-    exit 0
-fi
-
-echo ""
-echo "Obtaining SSL certificate..."
-
-certbot --nginx \
---non-interactive \
---agree-tos \
--m "$LETSENCRYPT_EMAIL" \
--d "$DOMAIN" \
--d "www.$DOMAIN" || { echo "SSL Installation failed!"; rollback; }
-
-# Enable HTTP/2 for the domain
-# Certbot usually adds 'listen 443 ssl;' which we can append to.
-NGINX_VERSION=$(nginx -v 2>&1 | grep -o '[0-9\.]*' | head -1)
-if dpkg --compare-versions "$NGINX_VERSION" "ge" "1.25.0" 2>/dev/null; then
-    sed -i '/listen 443 ssl;/a \    http2 on;' /etc/nginx/sites-available/$DOMAIN.conf
+    echo "Skipping SSL Installation (--skip-ssl flag provided)."
 else
-    sed -i 's/listen 443 ssl;/listen 443 ssl http2;/g' /etc/nginx/sites-available/$DOMAIN.conf
+    echo ""
+    echo "Checking DNS..."
+
+    if ! command -v dig >/dev/null 2>&1; then
+        echo "Installing dnsutils for DNS verification..."
+        apt-get update -y >/dev/null 2>&1
+        apt-get install -y dnsutils >/dev/null 2>&1 || apt-get install -y bind9-dnsutils >/dev/null 2>&1
+    fi
+    DOMAIN_IP=$(dig +short @8.8.8.8 "$DOMAIN" | tail -n1)
+    SERVER_IP=$(curl -4 -s https://ifconfig.me)
+
+    if [ "$DOMAIN_IP" != "$SERVER_IP" ]; then
+        echo ""
+        echo "Domain DNS does not point to this server."
+        echo "Skipping SSL."
+    else
+        echo ""
+        echo "Obtaining SSL certificate..."
+
+        certbot --nginx \
+        --non-interactive \
+        --agree-tos \
+        -m "$LETSENCRYPT_EMAIL" \
+        -d "$DOMAIN" \
+        -d "www.$DOMAIN" || { echo "SSL Installation failed!"; rollback; }
+
+        # Enable HTTP/2 for the domain
+        # Certbot usually adds 'listen 443 ssl;' which we can append to.
+        NGINX_VERSION=$(nginx -v 2>&1 | grep -o '[0-9\.]*' | head -1)
+        if dpkg --compare-versions "$NGINX_VERSION" "ge" "1.25.0" 2>/dev/null; then
+            sed -i '/listen 443 ssl;/a \    http2 on;' /etc/nginx/sites-available/$DOMAIN.conf
+        else
+            sed -i 's/listen 443 ssl;/listen 443 ssl http2;/g' /etc/nginx/sites-available/$DOMAIN.conf
+        fi
+        systemctl reload nginx
+
+        echo "SSL and HTTP/2 installed."
+
+        echo ""
+        echo "Updating WordPress URLs..."
+
+        sudo -u "$USER" wp option update home \
+        "https://$DOMAIN" \
+        --path=/home/$USER/public_html
+
+        sudo -u "$USER" wp option update siteurl \
+        "https://$DOMAIN" \
+        --path=/home/$USER/public_html
+
+        echo "HTTPS enabled."
+    fi
 fi
-systemctl reload nginx
-
-echo "SSL and HTTP/2 installed."
-
-echo ""
-echo "Updating WordPress URLs..."
-
-sudo -u "$USER" wp option update home \
-"https://$DOMAIN" \
---path=/home/$USER/public_html
-
-sudo -u "$USER" wp option update siteurl \
-"https://$DOMAIN" \
---path=/home/$USER/public_html
-
-echo "HTTPS enabled."
 
 cat > /home/$USER/site-info.txt <<EOF
 ========================================
