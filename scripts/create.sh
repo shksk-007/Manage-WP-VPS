@@ -179,6 +179,14 @@ sudo -u "$USER" wp core install \
 echo "WordPress installed."
 
 echo ""
+echo "Enabling Redis Object Cache..."
+
+sudo -u "$USER" wp plugin install redis-cache --activate --path=/home/$USER/public_html
+sudo -u "$USER" wp redis enable --path=/home/$USER/public_html
+
+echo "Redis Object Cache enabled."
+
+echo ""
 echo "Checking DNS..."
 
 DOMAIN_IP=$(dig +short "$DOMAIN" | tail -n1)
