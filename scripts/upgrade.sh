@@ -13,8 +13,9 @@ fastcgi_ignore_headers Cache-Control Expires Set-Cookie;
 EOF
 
 # 2. Iterate all sites and rebuild properly
-while IFS= read -r DOMAIN
+while IFS= read -r RAW_DOMAIN
 do
+    DOMAIN=$(echo "$RAW_DOMAIN" | tr -d '\r')
     [ -z "$DOMAIN" ] && continue
     USER=$(echo "$DOMAIN" | cut -d'.' -f1)
     
