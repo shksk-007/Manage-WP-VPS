@@ -181,13 +181,16 @@ echo "Resetting database and admin credentials..."
 DBUSER="${USER}_usr"
 NEW_DBPASS=$(openssl rand -hex 12)
 
-# Update database user password robustly for both localhost and 127.0.0.1
-mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$NEW_DBPASS';"
-mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'localhost' IDENTIFIED BY '$NEW_DBPASS';"
+# Update database user password robustly using CREATE OR REPLACE USER
+mariadb -e "CREATE OR REPLACE USER '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$NEW_DBPASS';"
+mariadb -e "CREATE OR REPLACE USER '$DBUSER'@'localhost' IDENTIFIED BY '$NEW_DBPASS';"
+mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'127.0.0.1';"
+mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'localhost';"
 mariadb -e "FLUSH PRIVILEGES;"
 
 if [ -f "$SITE/wp-config.php" ]; then
-    sudo -u "$USER" wp config set DB_PASSWORD "$NEW_DBPASS" --path="$SITE"
+    sudo -u "$USER" wp config set DB_PASSWORD "$NEW_DBPASS" --path="$SITE" || \
+    sed -i "s/define( *'DB_PASSWORD'.*/define( 'DB_PASSWORD', '$NEW_DBPASS' );/" "$SITE/wp-config.php"
 fi
 
 ADMIN_USER=$(sudo -u "$USER" wp user list --role=administrator --field=user_login --path="$SITE" | head -n 1)
