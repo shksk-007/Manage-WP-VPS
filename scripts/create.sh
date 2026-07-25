@@ -8,6 +8,8 @@ ADMIN_EMAIL=""
 ADMIN_PASSWORD=""
 FORCE=0
 
+SKIP_SSL=0
+
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -16,6 +18,7 @@ while [[ "$#" -gt 0 ]]; do
         --email=*) ADMIN_EMAIL="${1#*=}"; shift ;;
         --pass=*) ADMIN_PASSWORD="${1#*=}"; shift ;;
         --force) FORCE=1; shift ;;
+        --skip-ssl) SKIP_SSL=1; shift ;;
         *) DOMAIN="$1"; shift ;; # Fallback for old positional arg
     esac
 done
