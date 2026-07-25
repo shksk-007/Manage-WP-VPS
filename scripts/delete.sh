@@ -2,10 +2,16 @@
 
 DOMAIN="$1"
 FORCE=0
+NO_BACKUP=0
 
-if [ "$2" == "--force" ]; then
-    FORCE=1
-fi
+for arg in "$@"; do
+    if [ "$arg" == "--force" ]; then
+        FORCE=1
+    fi
+    if [ "$arg" == "--no-backup" ]; then
+        NO_BACKUP=1
+    fi
+done
 
 SITE_LIST="/opt/wp-host/sites.list"
 BACKUP_SCRIPT="/opt/wp-host/scripts/backup.sh"
@@ -60,19 +66,26 @@ echo " ✓ All Backups"
 echo " ✓ Site Registry"
 echo ""
 
-read -p "Continue? (y/N): " CONFIRM
+if [ "$FORCE" -eq 0 ]; then
+    read -p "Continue? (y/N): " CONFIRM
 
-if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
-    echo ""
-    echo "Cancelled."
-    exit 0
+    if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
+        echo ""
+        echo "Cancelled."
+        exit 0
+    fi
 fi
 
-echo ""
-echo "Creating final backup..."
+if [ "$NO_BACKUP" -eq 0 ]; then
+    echo ""
+    echo "Creating final backup..."
 
-if [ -x "$BACKUP_SCRIPT" ]; then
-    "$BACKUP_SCRIPT" "$DOMAIN"
+    if [ -x "$BACKUP_SCRIPT" ]; then
+        "$BACKUP_SCRIPT" "$DOMAIN"
+    fi
+else
+    echo ""
+    echo "Skipping final backup due to --no-backup flag."
 fi
 
 echo ""

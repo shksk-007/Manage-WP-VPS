@@ -70,7 +70,7 @@ rollback() {
     echo "========================================="
     echo " ERROR DETECTED: Rolling back changes..."
     echo "========================================="
-    /opt/wp-host/scripts/delete.sh "$DOMAIN" --force
+    /opt/wp-host/scripts/delete.sh "$DOMAIN" --force --no-backup
     echo "Rollback complete. The broken site has been removed."
     exit 1
 }
