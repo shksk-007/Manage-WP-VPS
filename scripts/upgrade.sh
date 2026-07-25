@@ -30,7 +30,12 @@ do
     # Re-apply Certbot SSL and HTTP/2
     # Because we overwrote the config, we need certbot to re-insert the SSL block.
     # We use --reinstall to force it to parse the new Nginx config and insert the SSL blocks without renewing the cert.
-    certbot --nginx --non-interactive -d "$DOMAIN" -d "www.$DOMAIN" --reinstall || true
+    certbot --nginx \
+        --non-interactive \
+        --agree-tos \
+        --expand \
+        -d "$DOMAIN" \
+        -d "www.$DOMAIN" --reinstall || true
     
     # Add HTTP/2 safely for any Nginx version
     NGINX_VERSION=$(nginx -v 2>&1 | grep -o '[0-9\.]*' | head -1)

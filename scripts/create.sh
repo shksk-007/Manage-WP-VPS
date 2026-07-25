@@ -230,6 +230,7 @@ else
         certbot --nginx \
         --non-interactive \
         --agree-tos \
+        --expand \
         -m "$LETSENCRYPT_EMAIL" \
         -d "$DOMAIN" \
         -d "www.$DOMAIN" || { echo "SSL Installation failed!"; rollback; }
