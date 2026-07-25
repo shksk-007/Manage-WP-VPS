@@ -21,8 +21,10 @@ backup_site() {
 
     if [ "$MODE" = "cron" ]; then
         DATE=$(date +%d_%m_%Y)
-    else
+    elif [ "$MODE" = "manual" ]; then
         DATE=$(date +%d_%m_%Y_Manual)
+    else
+        DATE="$MODE"
     fi
 
     SITE_DIR="$BACKUP_DIR/$DOMAIN/$DATE"

@@ -363,7 +363,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-site-backup').addEventListener('click', () => {
         if(!currentManageDomain) return;
-        runCommand('backup', [currentManageDomain], `Backup: ${currentManageDomain}`);
+        const customName = prompt("Enter a custom name for this backup (or leave blank for default):");
+        if (customName === null) return;
+        const safeName = customName.trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
+        
+        const args = [currentManageDomain];
+        if (safeName) args.push(safeName);
+
+        runCommand('backup', args, `Backup: ${currentManageDomain}`);
         setTimeout(() => loadBackups(currentManageDomain), 5000);
     });
 

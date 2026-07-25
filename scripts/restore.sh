@@ -50,12 +50,6 @@ echo "Domain : $DOMAIN"
 
 echo ""
 
-echo "Creating safety backup..."
-
-if [ -x "$BACKUP_SCRIPT" ]; then
-    "$BACKUP_SCRIPT" "$DOMAIN"
-fi
-
 if [ -n "$TARGET_BACKUP" ]; then
     BACKUP="$TARGET_BACKUP"
 else
@@ -182,6 +176,29 @@ find "$SITE" \
 
 echo ""
 
+echo "Resetting database and admin credentials..."
+
+DBUSER="${USER}_usr"
+NEW_DBPASS=$(openssl rand -hex 12)
+
+# Update database user password
+mariadb -e "ALTER USER '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$NEW_DBPASS'; FLUSH PRIVILEGES;"
+
+if [ -f "$SITE/wp-config.php" ]; then
+    sudo -u "$USER" wp config set DB_PASSWORD "$NEW_DBPASS" --path="$SITE"
+fi
+
+ADMIN_USER=$(sudo -u "$USER" wp user list --role=administrator --field=user_login --path="$SITE" | head -n 1)
+NEW_ADMINPASS=""
+if [ -n "$ADMIN_USER" ]; then
+    NEW_ADMINPASS=$(openssl rand -hex 12)
+    sudo -u "$USER" wp user update "$ADMIN_USER" --user_pass="$NEW_ADMINPASS" --path="$SITE" >/dev/null
+fi
+
+echo "Credentials reset."
+
+echo ""
+
 echo "Starting PHP-FPM..."
 
 systemctl start php8.5-fpm
@@ -237,6 +254,15 @@ fi
 echo "Permissions : Fixed"
 echo "PHP-FPM     : Running"
 echo "Nginx       : Reloaded"
+echo "========================================="
+echo " NEW SECURITY CREDENTIALS"
+echo "========================================="
+echo "Database User: $DBUSER"
+echo "Database Pass: $NEW_DBPASS"
+if [ -n "$NEW_ADMINPASS" ]; then
+    echo "WP Admin User: $ADMIN_USER"
+    echo "WP Admin Pass: $NEW_ADMINPASS"
+fi
 echo ""
 
 exit 0
