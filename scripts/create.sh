@@ -53,6 +53,8 @@ if [ $FORCE -eq 0 ]; then
     read -p "Admin Email: " ADMIN_EMAIL
     read -s -p "Admin Password: " ADMIN_PASSWORD
     echo ""
+    read -p "Let's Encrypt Email (for SSL warnings): " LETSENCRYPT_EMAIL
+    echo ""
 
     if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
         echo "Cancelled."
@@ -210,7 +212,7 @@ echo "Obtaining SSL certificate..."
 certbot --nginx \
 --non-interactive \
 --agree-tos \
--m "$ADMIN_EMAIL" \
+-m "$LETSENCRYPT_EMAIL" \
 -d "$DOMAIN" \
 -d "www.$DOMAIN"
 
