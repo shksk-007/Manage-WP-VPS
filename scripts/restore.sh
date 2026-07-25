@@ -179,21 +179,22 @@ find "$SITE" \
 
 echo ""
 
-echo "Resetting database and admin credentials..."
+echo "Restoring database user and privileges to match wp-config.php..."
 
 DBUSER="${USER}_usr"
-NEW_DBPASS=$(openssl rand -hex 12)
-
-# Update database user password robustly using CREATE OR REPLACE USER
-mariadb -e "CREATE OR REPLACE USER '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$NEW_DBPASS';"
-mariadb -e "CREATE OR REPLACE USER '$DBUSER'@'localhost' IDENTIFIED BY '$NEW_DBPASS';"
-mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'127.0.0.1';"
-mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'localhost';"
-mariadb -e "FLUSH PRIVILEGES;"
 
 if [ -f "$SITE/wp-config.php" ]; then
-    sudo -u "$USER" wp config set DB_PASSWORD "$NEW_DBPASS" --path="$SITE" || \
-    sed -i "s/define( *'DB_PASSWORD'.*/define( 'DB_PASSWORD', '$NEW_DBPASS' );/" "$SITE/wp-config.php"
+    # Extract the original password from the restored wp-config.php
+    OLD_DBPASS=$(sudo -u "$USER" wp config get DB_PASSWORD --path="$SITE" 2>/dev/null || true)
+    
+    if [ -n "$OLD_DBPASS" ]; then
+        # Ensure the user exists and has the correct password and privileges
+        mariadb -e "CREATE OR REPLACE USER '$DBUSER'@'127.0.0.1' IDENTIFIED BY '$OLD_DBPASS';"
+        mariadb -e "CREATE OR REPLACE USER '$DBUSER'@'localhost' IDENTIFIED BY '$OLD_DBPASS';"
+        mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'127.0.0.1';"
+        mariadb -e "GRANT ALL PRIVILEGES ON \`${DB}\`.* TO '$DBUSER'@'localhost';"
+        mariadb -e "FLUSH PRIVILEGES;"
+    fi
 fi
 
 ADMIN_USER=$(sudo -u "$USER" wp user list --role=administrator --field=user_login --path="$SITE" | head -n 1)
@@ -203,7 +204,7 @@ if [ -n "$ADMIN_USER" ]; then
     sudo -u "$USER" wp user update "$ADMIN_USER" --user_pass="$NEW_ADMINPASS" --path="$SITE" >/dev/null
 fi
 
-echo "Credentials reset."
+echo "Credentials reset (WP Admin only)."
 
 echo ""
 
@@ -265,11 +266,11 @@ echo "Nginx       : Reloaded"
 echo "========================================="
 echo " NEW SECURITY CREDENTIALS"
 echo "========================================="
-echo "Database User: $DBUSER"
-echo "Database Pass: $NEW_DBPASS"
 if [ -n "$NEW_ADMINPASS" ]; then
     echo "WP Admin User: $ADMIN_USER"
     echo "WP Admin Pass: $NEW_ADMINPASS"
+else
+    echo "No admin credentials were changed."
 fi
 echo ""
 
