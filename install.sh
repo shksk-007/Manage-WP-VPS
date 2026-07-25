@@ -69,9 +69,14 @@ systemctl restart mariadb || true
 # Ensure MariaDB is enabled and running
 systemctl enable mariadb || true
 systemctl start mariadb || true
-echo "[3.5/7] Configuring Automated Backups Cron Job..."
+echo "[3.5/7] Configuring Automated Cron Jobs..."
+# Setup Cron for Backups (Daily at 2 AM)
 echo "0 2 * * * root /usr/local/bin/wp-host backup --all" > /etc/cron.d/wp-host-backups
 chmod 644 /etc/cron.d/wp-host-backups
+
+# Setup Cron for Security Scans (Twice a day at 6 AM and 6 PM)
+echo "0 6,18 * * * root /usr/local/bin/wp-host scan --all" > /etc/cron.d/wp-host-scan
+chmod 644 /etc/cron.d/wp-host-scan
 
 # Update hardcoded 8.3 to 8.5 in scripts if they exist
 find . -type f -name "*.sh" -exec sed -i 's/php8.3/php8.5/g' {} +

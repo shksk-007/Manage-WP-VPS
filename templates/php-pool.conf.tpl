@@ -10,12 +10,12 @@ listen.mode = 0660
 
 pm = dynamic
 
-pm.max_children = 20
-pm.start_servers = 4
-pm.min_spare_servers = 2
-pm.max_spare_servers = 6
+pm.max_children = 50
+pm.start_servers = 10
+pm.min_spare_servers = 5
+pm.max_spare_servers = 15
 
-pm.max_requests = 500
+pm.max_requests = 1000
 
 clear_env = no
 
