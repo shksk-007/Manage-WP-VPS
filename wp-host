@@ -26,21 +26,21 @@ rollback)
     /opt/wp-host/scripts/rollback.sh "$2"
     ;;
 create)
-    /opt/wp-host/scripts/create.sh "$2"
+    /opt/wp-host/scripts/create.sh "${@:2}"
     ;;
 security)
     /opt/wp-host/scripts/security.sh
     ;;
 delete)
-    /opt/wp-host/scripts/delete.sh "$2"
+    /opt/wp-host/scripts/delete.sh "${@:2}"
     ;;
 
 backup)
-    /opt/wp-host/scripts/backup.sh "$2" "$3"
+    /opt/wp-host/scripts/backup.sh "${@:2}"
     ;;
 
 restore)
-    /opt/wp-host/scripts/restore.sh "$2"
+    /opt/wp-host/scripts/restore.sh "${@:2}"
     ;;
 
 recover)
