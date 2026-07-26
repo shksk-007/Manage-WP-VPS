@@ -12,6 +12,10 @@ fi
 
 case "$COMMAND" in
 
+fm|filemanager)
+    /opt/wp-host/scripts/filemanager.sh "$2" "$3"
+    ;;
+
 scan)
     /opt/wp-host/scripts/scan.sh "$2"
     ;;

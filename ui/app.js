@@ -313,6 +313,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loadBackups(domain);
     }
 
+    document.getElementById('btn-site-fm').addEventListener('click', () => {
+        if(!currentManageDomain) return;
+        const action = prompt(`Turn File Manager ON or OFF for ${currentManageDomain}?\n\nType 'on' to enable it and get a password.\nType 'off' to securely remove it.`, 'on');
+        if (action === 'on' || action === 'off') {
+            runCommand('fm', [currentManageDomain, action], `File Manager - ${currentManageDomain}`);
+        }
+    });
+
     document.getElementById('btn-site-login').addEventListener('click', async () => {
         if(!currentManageDomain) return;
         

@@ -59,7 +59,7 @@ if ($action === 'execute') {
     $allowed_commands = [
         'list', 'status', 'doctor', 'monitor', 'health', 'security', 
         'create', 'delete', 'backup', 'restore', 'recover', 'update', 'migrate', 'logs',
-        'login', 'backups-list', 'scan', 'activity', 'performance'
+        'login', 'backups-list', 'scan', 'activity', 'performance', 'fm'
     ];
 
     if (!in_array($command, $allowed_commands)) {
